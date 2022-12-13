@@ -1,13 +1,27 @@
-import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
-import init, {greet} from "./../@rsw/my-wasm-test/pkg";
 import './App.css'
+import { useEffect, useState } from 'react';
+import { initialize } from './domain';
+import { CounterState } from '../@rsw/my-wasm-test/pkg/my_wasm_test';
 
-function App() {
-  const [count, setCount] = useState(0)
+function App(){
+  const [counter, setCounter] = useState<CounterState | undefined>();
+  const [count, setCount] = useState<number>(0);
+
   useEffect(() => {
-    init();
+    initialize().then(counter => {
+      setCounter(counter);
+      setCount(counter.get_counter());
+    });
   }, []);
+
+  function handleClick() {
+    console.log('clicked!');
+    const updatedCount = counter?.increment_counter();
+    if (updatedCount) {
+      setCount(updatedCount);
+    }
+  }
 
   return (
     <div className="App">
@@ -20,11 +34,9 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+
       <div className="card">
-        <button onClick={() => {
-          setCount((count) => count + 1)
-          greet("hellow!");
-        }}>
+        <button onClick={handleClick}>
           count is {count}
         </button>
         <p>
